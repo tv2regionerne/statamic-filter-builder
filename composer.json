@@ -1,0 +1,19 @@
+{
+    "name": "tv2regionerne/statamic-filter-builder",
+    "autoload": {
+        "psr-4": {
+            "Tv2regionerne\\StatamicFilterBuilder\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic Filter Builder",
+            "description": "Statamic Filter Builder addon"
+        },
+        "laravel": {
+            "providers": [
+                "Tv2regionerne\\StatamicFilterBuilder\\ServiceProvider"
+            ]
+        }
+    }
+}
