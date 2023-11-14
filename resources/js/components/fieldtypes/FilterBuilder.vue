@@ -143,35 +143,6 @@ export default {
     .\@lg\:w-1\/2 {
         width: 40% !important;
     }
-    .list-fieldtype .table-fieldtype-table {
-        margin-bottom: 0.5rem !important;
-    }
-    .list-fieldtype .table-fieldtype-table .input-text {
-        padding-top: 0.4375rem;
-        padding-bottom: 0.4375rem;
-        height: 2.25rem;
-    }
-    .list-fieldtype .btn {
-        padding: 0 !important;
-        border: 0 !important;
-        box-shadow: none !important;
-        background: none !important;
-        height: auto !important;
-        color: #73808c !important;
-    }
-    .relationship-fieldtype .item .item-move {
-        line-height: 1.25rem;
-    }
-    .relationship-fieldtype .item .item-inner {
-        padding-top: 0.375rem;
-        padding-bottom: 0.375rem;
-    }
-    .relationship-fieldtype .relationship-input-buttons {
-        margin-top: 0.5rem !important;
-    }
-    .relationship-fieldtype .relationship-input-buttons .text-blue {
-        color: #73808c !important;
-    }
 }
 .filter_builder-dropdown {
     .popover-content {
