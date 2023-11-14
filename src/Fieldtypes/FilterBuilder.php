@@ -29,7 +29,7 @@ class FilterBuilder extends Fieldtype
                         'instructions' => __('The filtered collections'),
                         'mode' => 'select',
                         'type' => 'collections',
-                        'validate' => 'required',
+                        'validate' => 'required_without:{this}.variables',
                     ],
                 ],
             ],
@@ -74,6 +74,65 @@ class FilterBuilder extends Fieldtype
 
             return $filter;
         })->all();
+    }
+
+    public function preProcessValidatable($data)
+    {
+        return collect($data)->map(function ($filter) {
+            $fields = $this->filterFields($filter);
+            $values = $filter['values'];
+            $processed = $fields
+                ->addValues($filter['values'])
+                ->preProcessValidatables()
+                ->values()
+                ->all();
+            $filter['values'] = array_merge($values, $processed);
+
+            return $filter;
+        })->all();
+    }
+
+    public function extraRules(): array
+    {
+        return collect($this->field->value())->map(function ($filter, $index) {
+            $prefix = $this->field->handle().'.'.$index.'.values';
+            $fields = $this->filterFields($filter);
+            $values = $filter['values'];
+            $rules = $fields
+                ->addValues($values)
+                ->validator()
+                ->withContext([
+                    'prefix' => $this->field->validationContext('prefix').$prefix.'.',
+                ])
+                ->rules();
+
+            return collect($rules)
+                ->mapWithKeys(function ($rules, $handle) use ($prefix) {
+                    return [$prefix.'.'.$handle => $rules];
+                })->all();
+        })->reduce(function ($carry, $rules) {
+            return $carry->merge($rules);
+        }, collect())->all();
+    }
+
+    public function extraValidationAttributes(): array
+    {
+        return collect($this->field->value())->map(function ($filter, $index) {
+            $prefix = $this->field->handle().'.'.$index.'.values';
+            $fields = $this->filterFields($filter);
+            $values = $filter['values'];
+            $attributes = $fields
+                ->addValues($values)
+                ->validator()
+                ->attributes();
+
+            return collect($attributes)
+                ->mapWithKeys(function ($rules, $handle) use ($prefix) {
+                    return [$prefix.'.'.$handle => $rules];
+                })->all();
+        })->reduce(function ($carry, $attributes) {
+            return $carry->merge($attributes);
+        }, collect())->all();
     }
 
     public function preload()
@@ -175,6 +234,9 @@ class FilterBuilder extends Fieldtype
                 'values' => [
                     'type' => 'date',
                     'width' => 50,
+                    'validate' => [
+                        'required_without:{this}.variables',
+                    ],
                 ],
             ],
             'integer', 'float' => [
@@ -195,6 +257,9 @@ class FilterBuilder extends Fieldtype
                 'values' => [
                     'type' => 'list',
                     'width' => 50,
+                    'validate' => [
+                        'required_without:{this}.variables',
+                    ],
                 ],
             ],
             'entries' => [
@@ -213,6 +278,9 @@ class FilterBuilder extends Fieldtype
                     'width' => 50,
                     'create' => false,
                     'collections' => $field->get('collections'),
+                    'validate' => [
+                        'required_without:{this}.variables',
+                    ],
                 ],
             ],
             'terms' => [
@@ -231,6 +299,9 @@ class FilterBuilder extends Fieldtype
                     'width' => 50,
                     'create' => false,
                     'taxonomies' => $field->get('taxonomies'),
+                    'validate' => [
+                        'required_without:{this}.variables',
+                    ],
                 ],
             ],
             'users' => [
@@ -248,6 +319,9 @@ class FilterBuilder extends Fieldtype
                     'type' => 'users',
                     'width' => 50,
                     'create' => false,
+                    'validate' => [
+                        'required_without:{this}.variables',
+                    ],
                 ],
             ],
             default => [
@@ -265,14 +339,20 @@ class FilterBuilder extends Fieldtype
                 'values' => [
                     'type' => 'list',
                     'width' => 50,
+                    'validate' => [
+                        'required_without:{this}.variables',
+                    ],
                 ],
             ],
         };
 
         $fieldItems['variables'] = [
             'type' => 'list',
-            'default' => [''],
             'width' => 50,
+            'validate' => [
+                'nullable',
+                'filter_builder_fieldtype_variables',
+            ],
         ];
 
         $fields = collect($fieldItems)->map(function ($field, $handle) {
