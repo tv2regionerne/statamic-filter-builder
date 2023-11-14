@@ -7,9 +7,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/addon.js',
-                // 'resources/css/addon.css'
             ],
-            // publicDirectory: 'resources/dist',
         }),
         vue(),
     ],

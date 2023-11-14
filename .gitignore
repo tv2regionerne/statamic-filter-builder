@@ -1,4 +1,4 @@
 node_modules
 vendor
 mix-manifest.json
-hot
+public/hot
