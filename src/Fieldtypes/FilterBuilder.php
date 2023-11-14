@@ -3,11 +3,11 @@
 namespace Tv2regionerne\StatamicFilterBuilder\Fieldtypes;
 
 use Facades\Statamic\Fieldtypes\RowId;
-use Statamic\Fields\Fieldtype;
 use Statamic\Facades\Collection;
-use Statamic\Support\Arr;
 use Statamic\Fields\Field;
 use Statamic\Fields\Fields;
+use Statamic\Fields\Fieldtype;
+use Statamic\Support\Arr;
 
 class FilterBuilder extends Fieldtype
 {
@@ -51,6 +51,7 @@ class FilterBuilder extends Fieldtype
                 $values['values'] = [$values['values']];
             }
             $filter['values'] = $values;
+
             return $filter;
         })->all();
     }
@@ -70,13 +71,14 @@ class FilterBuilder extends Fieldtype
                 ->values()
                 ->all();
             $filter['values'] = $values;
+
             return $filter;
         })->all();
     }
 
     public function preload()
     {
-        $fields = $this->fields()->map(function($field) {
+        $fields = $this->fields()->map(function ($field) {
             return [
                 'handle' => $field->handle(),
                 'display' => $field->display(),
@@ -133,7 +135,7 @@ class FilterBuilder extends Fieldtype
     }
 
     protected function filterFields($filter)
-    {   
+    {
         return $this->fieldFields($this->fields()[$filter['handle']]);
     }
 
@@ -192,7 +194,6 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'list',
-                    'default' => [''],
                     'width' => 50,
                 ],
             ],
@@ -263,7 +264,6 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'list',
-                    'default' => [''],
                     'width' => 50,
                 ],
             ],
@@ -278,7 +278,7 @@ class FilterBuilder extends Fieldtype
         $fields = collect($fieldItems)->map(function ($field, $handle) {
             return compact('handle', 'field');
         });
-        
+
         return new Fields(
             $fields,
             $this->field()->parent(),
