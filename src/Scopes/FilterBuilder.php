@@ -11,7 +11,7 @@ class Filters extends Scope
 {
     public function apply($query, $values)
     {
-        $filters = $values['filters'] ?? [];
+        $filters = $values['filter_builder'] ?? [];
 
         foreach ($filters as $filter) {
             $handle = $filter['handle'];

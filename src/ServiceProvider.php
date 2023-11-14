@@ -11,7 +11,7 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $scopes = [
-        Scopes\Filters::class,
+        Scopes\FilterBuilder::class,
     ];
 
     protected $vite = [
