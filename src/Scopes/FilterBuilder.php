@@ -21,7 +21,10 @@ class FilterBuilder extends Scope
 
             $cascade = Cascade::toArray();
             foreach ($variables as $variable) {
-                $values[] = (string) Antlers::parse($variable, $cascade);
+                try {
+                    $values[] = (string) Antlers::parse($variable, $cascade);
+                } catch (\Exception $e) {
+                }
             }
 
             $query->where(function ($query) use ($handle, $operator, $values) {
