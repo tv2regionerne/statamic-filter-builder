@@ -7,7 +7,7 @@ use Statamic\Facades\Cascade;
 use Statamic\Query\Scopes\Scope;
 use Statamic\Support\Str;
 
-class Filters extends Scope
+class FilterBuilder extends Scope
 {
     public function apply($query, $values)
     {
