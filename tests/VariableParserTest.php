@@ -82,6 +82,10 @@ it('skips invalid values', function () {
     expect($parsed)
         ->toBeNull();
 
+    $parsed = VariableParser::parse('{{ foo }}');
+    expect($parsed)
+        ->toBeNull();
+
     $parsed = VariableParser::parse('{{ if }}');
     expect($parsed)
         ->toBeNull();
