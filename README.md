@@ -16,4 +16,6 @@ Add a filter builder field to a publish form then create and entry and set up yo
 
 ```html
 {{ collection:articles query_scope="filter_builder" :filter_builder="my_filters" }}
+    ...
+{{ /collection:articles }}
 ```
