@@ -1,14 +1,6 @@
 # Statamic Filter Builder
 
-> Statamic Filter Builder is a Statamic addon that does something pretty neat.
-
-## Features
-
-This addon does:
-
-- This
-- And this
-- And even this
+This addon allows you to build advanced collection filters through the control panel.
 
 ## How to Install
 
@@ -20,4 +12,8 @@ composer require tv2regionerne/statamic-filter-builder
 
 ## How to Use
 
-Here's where you can explain how to use this wonderful addon.
+Add a filter builder field to a publish form then create and entry and set up your filtering rules. In your template you can then apply those filters to a collection tag like this:
+
+```html
+{{ collection:articles query_scope="filter_builder" :filter_builder="my_filters" }}
+```

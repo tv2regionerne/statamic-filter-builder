@@ -11,18 +11,12 @@ class ServiceProvider extends AddonServiceProvider
     ];
 
     protected $scopes = [
-        Scopes\Filters::class,
+        Scopes\FilterBuilder::class,
     ];
 
     protected $vite = [
         'input' => [
             'resources/js/addon.js',
         ],
-        // 'publicDirectory' => 'resources/dist',
     ];
-    
-    public function bootAddon()
-    {
-        //
-    }
 }

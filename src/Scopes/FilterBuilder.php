@@ -1,19 +1,19 @@
 <?php
+
 namespace Tv2regionerne\StatamicFilterBuilder\Scopes;
 
-use Statamic\Facades\Antlers;
 use Statamic\Facades\Cascade;
 use Statamic\Query\Scopes\Scope;
 use Statamic\Support\Str;
- 
-class Filters extends Scope
+use Tv2regionerne\StatamicFilterBuilder\VariableParser;
+
+class FilterBuilder extends Scope
 {
     public function apply($query, $values)
     {
-        $filters = $values['filters'] ?? [];
+        $filters = $values['filter_builder'] ?? [];
 
         foreach ($filters as $filter) {
-
             $handle = $filter['handle'];
             $operator = $filter['values']['operator'];
             $values = $filter['values']['values'];
@@ -21,10 +21,13 @@ class Filters extends Scope
 
             $cascade = Cascade::toArray();
             foreach ($variables as $variable) {
-                $values[] = (string) Antlers::parse($variable, $cascade);
+                if (! $parsed = VariableParser::parse($variable, $cascade)) {
+                    continue;
+                }
+                $values = array_merge($values, $parsed);
             }
-    
-            $query->where(function($query) use ($handle, $operator, $values) {
+
+            $query->where(function ($query) use ($handle, $operator, $values) {
                 foreach ($values as $i => $value) {
                     if ($operator === 'like') {
                         $value = Str::ensureLeft($value, '%');
@@ -34,7 +37,6 @@ class Filters extends Scope
                     $query->{$method}($handle, $operator, $value);
                 }
             });
-            
         }
     }
 }

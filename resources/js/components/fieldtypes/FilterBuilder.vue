@@ -18,23 +18,22 @@
                             </button>
                         </div>
                     </div>
-                    <div class="replicator-set-body publish-fields @container">
-                        <publish-container
-                            :name="`filter-${index}`"
-                            :meta="meta.existing[filter.id] ?? meta.new[filter.handle]"
-                            :values="filter.values"
-                            :track-dirty-state="false"
-                            @updated="($event) => updateFilter(index, $event)"
-                        >
-                            <publish-fields
-                                slot-scope="{ setFieldValue, setFieldMeta }"
-                                :fields="filterFields[filter.type][filter.handle]"
-                                :name-prefix="`filter-${index}`"
-                                class="w-full"
-                                @updated="setFieldValue"
-                                @meta-updated="setFieldMeta"
-                            />
-                        </publish-container>
+                    <div class="replicator-set-body flex-1 publish-fields @container">
+                        <set-field
+                            v-for="field in filterFields[filter.type][filter.handle]"
+                            :key="field.handle"
+                            :field="field"
+                            :value="filter.values[field.handle]"
+                            :meta="filterFieldMeta(filter.id, filter.handle, field.handle)"
+                            :parent-name="name"
+                            :set-index="index"
+                            :errors="filterFieldErrors(index, field.handle)"
+                            :field-path="filterFieldPath(index, field.handle)"
+                            :read-only="isReadOnly"
+                            v-show="true || showField(field.field, filterFieldPath(index, field.handle))"
+                            @updated="($event) => updateFilterField(index, field.handle, $event)"
+                            @meta-updated="($event) => updateFilterMeta(filter.id, field.handle, $event)"
+                        />
                     </div>
                 </div>
             </div>
@@ -57,12 +56,17 @@
 </template>
 
 <script>
-import qs from "qs";
+const { ValidatesFieldConditions } = FieldConditions;
 
 export default {
 
-    mixins: [ Fieldtype ],
+    mixins: [
+        Fieldtype,
+        ValidatesFieldConditions,
+    ],
     
+    inject: ['storeName'],
+
     computed: {
 
         fieldsObject() {
@@ -86,11 +90,19 @@ export default {
     methods: {
 
         addFilter(type, handle) {
+            const id = uniqid();
             this.$refs.addFilterDropdowm.close();
             this.update([
                 ...this.value,
-                { type, handle, values: this.meta.defaults[handle] },
+                { id, type, handle, values: this.meta.defaults[handle] },
             ]);
+            this.updateMeta({
+                ...this.meta,
+                existing: {
+                    ...this.meta.existing,
+                    [id]: this.meta.new[handle],
+                },
+            });
         },
 
         resetFilter(index, handle) {
@@ -102,12 +114,31 @@ export default {
             ]);
         },
 
-        updateFilter(index, values) {
+        updateFilterField(index, handle, value) {
             this.update([
                 ...this.value.slice(0, index),
-                {...this.value[index], values: { ...values }},
+                {
+                    ...this.value[index],
+                    values: {
+                        ...this.value[index].values,
+                        [handle]: value,
+                    }
+                },
                 ...this.value.slice(index + 1),
             ]);
+        },
+
+        updateFilterMeta(id, handle, meta) {
+            this.updateMeta({
+                ...this.meta,
+                existing: {
+                    ...this.meta.existing,
+                    [id]: {
+                        ...this.meta.existing[id],
+                        [handle]: meta,
+                    },
+                },
+            });
         },
 
         removeFilter(index) {
@@ -125,6 +156,20 @@ export default {
             return `${handle}`;
         },
 
+        filterFieldMeta(id, filter, handle) {
+            return this.meta.existing[id][handle];
+        },
+
+        filterFieldPath(index, handle) {
+            return `${this.handle}.${index}.values.${handle}`;
+        },
+
+        filterFieldErrors(index, handle) {
+            const state = this.$store.state.publish[this.storeName];
+            if (! state) return [];
+            return state.errors[this.filterFieldPath(index, handle)] || [];
+        },
+
     },
 
 };
@@ -132,45 +177,16 @@ export default {
 <style>
 .filter_builder-fieldtype {
     .replicator-set-body {
-        padding: 0.5rem;
+        padding: 0.5rem !important;
     }
     .form-group {
-        padding: 0.5rem;
+        padding: 0.5rem !important;
     }
     .\@lg\:w-1\/4 {
         width: 20% !important;
     }
     .\@lg\:w-1\/2 {
         width: 40% !important;
-    }
-    .list-fieldtype .table-fieldtype-table {
-        margin-bottom: 0.5rem !important;
-    }
-    .list-fieldtype .table-fieldtype-table .input-text {
-        padding-top: 0.4375rem;
-        padding-bottom: 0.4375rem;
-        height: 2.25rem;
-    }
-    .list-fieldtype .btn {
-        padding: 0 !important;
-        border: 0 !important;
-        box-shadow: none !important;
-        background: none !important;
-        height: auto !important;
-        color: #73808c !important;
-    }
-    .relationship-fieldtype .item .item-move {
-        line-height: 1.25rem;
-    }
-    .relationship-fieldtype .item .item-inner {
-        padding-top: 0.375rem;
-        padding-bottom: 0.375rem;
-    }
-    .relationship-fieldtype .relationship-input-buttons {
-        margin-top: 0.5rem !important;
-    }
-    .relationship-fieldtype .relationship-input-buttons .text-blue {
-        color: #73808c !important;
     }
 }
 .filter_builder-dropdown {

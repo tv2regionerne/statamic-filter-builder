@@ -5,15 +5,35 @@
             "Tv2regionerne\\StatamicFilterBuilder\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
+        }
+    },
     "extra": {
         "statamic": {
             "name": "Statamic Filter Builder",
-            "description": "Statamic Filter Builder addon"
+            "description": "Allows you to build advanced collection filters through the control panel."
         },
         "laravel": {
             "providers": [
                 "Tv2regionerne\\StatamicFilterBuilder\\ServiceProvider"
             ]
+        }
+    },
+    "require": {
+        "statamic/cms": "^4.0"
+    },
+    "require-dev": {
+        "nunomaduro/collision": "^7.4",
+        "orchestra/testbench": "^8.3",
+        "pestphp/pest": "^2.4",
+        "pestphp/pest-plugin-watch": "^2.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "pixelfear/composer-dist-plugin": true
         }
     }
 }
