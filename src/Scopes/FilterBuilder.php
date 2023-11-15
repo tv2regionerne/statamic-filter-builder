@@ -2,10 +2,10 @@
 
 namespace Tv2regionerne\StatamicFilterBuilder\Scopes;
 
-use Statamic\Facades\Antlers;
 use Statamic\Facades\Cascade;
 use Statamic\Query\Scopes\Scope;
 use Statamic\Support\Str;
+use Tv2regionerne\StatamicFilterBuilder\VariableParser;
 
 class FilterBuilder extends Scope
 {
@@ -21,10 +21,10 @@ class FilterBuilder extends Scope
 
             $cascade = Cascade::toArray();
             foreach ($variables as $variable) {
-                try {
-                    $values[] = (string) Antlers::parse($variable, $cascade);
-                } catch (\Exception $e) {
+                if (! $parsed = VariableParser::parse($variable, $cascade)) {
+                    continue;
                 }
+                $values = array_merge($values, $parsed);
             }
 
             $query->where(function ($query) use ($handle, $operator, $values) {

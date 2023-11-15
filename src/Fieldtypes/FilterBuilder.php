@@ -3,7 +3,6 @@
 namespace Tv2regionerne\StatamicFilterBuilder\Fieldtypes;
 
 use Facades\Statamic\Fieldtypes\RowId;
-use Statamic\Facades\Antlers;
 use Statamic\Facades\Collection;
 use Statamic\Fields\Field;
 use Statamic\Fields\Fields;
@@ -354,9 +353,7 @@ class FilterBuilder extends Fieldtype
                 'nullable',
                 function ($attribute, $value, $fail) {
                     foreach ($value as $variable) {
-                        try {
-                            Antlers::parse($variable, []);
-                        } catch (\Exception $e) {
+                        if (! VariableParser::validate($variable)) {
                             $fail(__('This field contains invalid variables.'));
                         }
                     }
