@@ -8,6 +8,7 @@ use Statamic\Fields\Field;
 use Statamic\Fields\Fields;
 use Statamic\Fields\Fieldtype;
 use Statamic\Support\Arr;
+use Tv2regionerne\StatamicFilterBuilder\VariableParser;
 
 class FilterBuilder extends Fieldtype
 {
@@ -354,7 +355,7 @@ class FilterBuilder extends Fieldtype
                 function ($attribute, $value, $fail) {
                     foreach ($value as $variable) {
                         if (! VariableParser::validate($variable)) {
-                            $fail(__('This field contains invalid variables.'));
+                            $fail(__('statamic-filter-builder::validation.variables'));
                         }
                     }
                 },
