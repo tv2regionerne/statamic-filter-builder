@@ -1,23 +1,25 @@
 <?php
 
+use Carbon\Carbon;
 use Tv2regionerne\StatamicFilterBuilder\VariableParser;
 
 uses(Tests\TestCase::class);
 
-it('parses single values', function () {
+it('parses string values', function () {
     $params = ['foo' => 'abcdefg'];
     $parsed = VariableParser::parse('{{ foo }}', $params);
     expect($parsed)
         ->toBeArray()
         ->toHaveCount(1)
         ->toMatchArray(['abcdefg']);
+});
 
+it('parses boolean values', function () {
     $params = ['foo' => true];
     $parsed = VariableParser::parse('{{ foo ? 1 : 0 }}', $params);
     expect($parsed)
         ->toBeArray()
-        ->toHaveCount(1)
-        ->toMatchArray([true]);
+        ->toHaveCount(1);
     expect($parsed[0])
         ->toBeTrue();
 
@@ -25,21 +27,22 @@ it('parses single values', function () {
     $parsed = VariableParser::parse('{{ foo ? 1 : 0 }}', $params);
     expect($parsed)
         ->toBeArray()
-        ->toHaveCount(1)
-        ->toMatchArray([false]);
+        ->toHaveCount(1);
     expect($parsed[0])
         ->toBeFalse();
 });
 
-it('parses single values as json', function () {
-    $params = ['foo' => true];
-    $parsed = VariableParser::parse('{{ foo | to_json }}', $params);
+it('parses date values', function () {
+    $now = Carbon::now();
+    $params = ['foo' => $now];
+    $parsed = VariableParser::parse('{{ foo }}', $params);
     expect($parsed)
         ->toBeArray()
-        ->toHaveCount(1)
-        ->toMatchArray([true]);
+        ->toHaveCount(1);
     expect($parsed[0])
-        ->toBeTrue();
+        ->toBeInstanceOf(Carbon::class);
+    expect($parsed[0]->toDateTimeString())
+        ->toEqual($now->toDateTimeString());
 });
 
 it('parses multiple values', function () {
@@ -63,7 +66,15 @@ it('parses multiple values', function () {
         ->toMatchArray(['abcdefg', '1234567']);
 });
 
-it('parses multiple values as json', function () {
+it('parses values as json', function () {
+    $params = ['foo' => true];
+    $parsed = VariableParser::parse('{{ foo | to_json }}', $params);
+    expect($parsed)
+        ->toBeArray()
+        ->toHaveCount(1);
+    expect($parsed[0])
+        ->toBeTrue();
+
     $params = [
         'foo' => [
             ['id' => 'abcdefg'],

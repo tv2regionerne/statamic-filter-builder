@@ -2,9 +2,9 @@
 
 namespace Tv2regionerne\StatamicFilterBuilder;
 
+use Carbon\Carbon;
 use Statamic\Facades\Antlers;
 use Statamic\Support\Arr;
-use Statamic\Support\Str;
 
 class VariableParser
 {
@@ -23,13 +23,14 @@ class VariableParser
             return;
         }
 
-        if (Str::contains($variable, 'to_json')) {
-            $parsed = Arr::wrap(json_decode($parsed, true));
-        } else {
-            $parsed = Arr::map(preg_split('/\s*,\s*/', $parsed), fn ($value) => self::castValue($value));
+        $decoded = json_decode($parsed, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $decoded = preg_split('/\s*,\s*/', $parsed);
         }
 
-        return $parsed;
+        return Arr::map(Arr::wrap($decoded), function ($value) {
+            return self::castValue($value);
+        });
     }
 
     public static function validate($variable)
@@ -49,10 +50,12 @@ class VariableParser
 
     protected static function castValue($value)
     {
-        if ($value === '1') {
+        if ($value === 1 || $value === '1') {
             return true;
-        } elseif ($value === '0') {
+        } elseif ($value === 0 || $value === '0') {
             return false;
+        } elseif (Carbon::canBeCreatedFromFormat($value, 'Y-m-d H:i:s')) {
+            return Carbon::createFromFormat('Y-m-d H:i:s', $value);
         }
 
         return $value;
