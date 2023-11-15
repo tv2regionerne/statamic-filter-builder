@@ -205,7 +205,7 @@ class FilterBuilder extends Fieldtype
             'toggle' => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '=' => __('Is'),
                         '<>' => __('Isn\'t'),
@@ -215,8 +215,9 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'display' => __('Value'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.value'),
                     'type' => 'toggle',
-                    'inline_label' => __('False'),
+                    'inline_display' => __('False'),
                     'inline_label_when_true' => __('True'),
                     'width' => 50,
                 ],
@@ -224,7 +225,7 @@ class FilterBuilder extends Fieldtype
             'date' => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '<' => __('Before'),
                         '>' => __('After'),
@@ -234,6 +235,7 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'date',
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.value'),
                     'width' => 50,
                     'validate' => [
                         'required_without:{this}.variables',
@@ -243,7 +245,7 @@ class FilterBuilder extends Fieldtype
             'integer', 'float' => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '=' => __('Equals'),
                         '<>' => __('Not equals'),
@@ -257,6 +259,7 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'list',
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.values'),
                     'width' => 50,
                     'validate' => [
                         'required_without:{this}.variables',
@@ -266,7 +269,7 @@ class FilterBuilder extends Fieldtype
             'entries' => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '=' => __('Is'),
                         '<>' => __('Isn\'t'),
@@ -276,6 +279,7 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'entries',
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.values'),
                     'width' => 50,
                     'create' => false,
                     'collections' => $field->get('collections'),
@@ -287,7 +291,7 @@ class FilterBuilder extends Fieldtype
             'terms' => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '=' => __('Is'),
                         '<>' => __('Isn\'t'),
@@ -297,6 +301,7 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'terms',
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.values'),
                     'width' => 50,
                     'create' => false,
                     'taxonomies' => $field->get('taxonomies'),
@@ -308,7 +313,7 @@ class FilterBuilder extends Fieldtype
             'users' => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '=' => __('Is'),
                         '<>' => __('Isn\'t'),
@@ -318,6 +323,7 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'users',
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.values'),
                     'width' => 50,
                     'create' => false,
                     'validate' => [
@@ -328,7 +334,7 @@ class FilterBuilder extends Fieldtype
             default => [
                 'operator' => [
                     'type' => 'select',
-                    'placeholder' => __('Select Operator'),
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.operator'),
                     'options' => [
                         '=' => __('Is'),
                         '<>' => __('Isn\'t'),
@@ -339,6 +345,7 @@ class FilterBuilder extends Fieldtype
                 ],
                 'values' => [
                     'type' => 'list',
+                    'display' => __('statamic-filter-builder::fieldtypes.filter_builder.values'),
                     'width' => 50,
                     'validate' => [
                         'required_without:{this}.variables',
@@ -349,6 +356,7 @@ class FilterBuilder extends Fieldtype
 
         $fieldItems['variables'] = [
             'type' => 'list',
+            'display' => __('statamic-filter-builder::fieldtypes.filter_builder.variables'),
             'width' => 50,
             'validate' => [
                 'nullable',
