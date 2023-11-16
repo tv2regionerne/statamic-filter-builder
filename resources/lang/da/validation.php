@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'variables' => '',
+    'variables' => 'Dette felt indeholder ugyldige variabler',
 ];
