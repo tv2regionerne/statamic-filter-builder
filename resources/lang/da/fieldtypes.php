@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'filter_builder.operator' => '',
-    'filter_builder.value' => '',
-    'filter_builder.values' => '',
-    'filter_builder.variables' => '',
-    'filter_builder.add_filter' => '',
-    'filter_builder.delete_filter' => '',
+    'filter_builder.operator' => 'Operator',
+    'filter_builder.value' => 'Værdi',
+    'filter_builder.values' => 'Værdier',
+    'filter_builder.variables' => 'Variabler',
+    'filter_builder.add_filter' => 'Tilføj Filter',
+    'filter_builder.delete_filter' => 'Slet Filter',
 ];
