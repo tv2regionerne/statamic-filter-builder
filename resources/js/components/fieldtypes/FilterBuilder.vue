@@ -13,7 +13,7 @@
                             <div class="text-sm leading-none">
                                 {{ filterlabel(filter) }}
                             </div>
-                            <button class="flex self-end group items-center" @click="removeFilter(index)" :aria-label="__('Delete Filter')">
+                            <button class="flex self-end group items-center" @click="removeFilter(index)" :aria-label="__('statamic-filter-builder::fieldtypes.filter_builder.delete_filter')">
                                 <svg-icon name="micro/trash" class="w-4 h-4 text-gray-600 group-hover:text-gray-900" />
                             </button>
                         </div>
@@ -42,7 +42,7 @@
                 <popover ref="addFilterDropdowm" class="dropdown-list filter_builder-dropdown" placement="bottom-start">
                     <template #trigger>
                         <button class="btn">
-                            Add Filter
+                            {{ __('statamic-filter-builder::fieldtypes.filter_builder.add_filter') }}
                         </button>
                     </template>
                     <button v-for="field in meta.fields" v-text="field.display" @click="addFilter('field', field.handle)" />
