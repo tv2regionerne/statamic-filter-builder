@@ -20,7 +20,7 @@ class FilterBuilder extends Scope
         foreach ($filters as $filter) {
             $handle = $filter['handle'];
             $operator = $filter['values']['operator'];
-            $values = $filter['values']['values'];
+            $values = $filter['values']['values'] = [];
             $variables = $filter['values']['variables'];
 
             $field = $fields[$handle];
@@ -32,6 +32,11 @@ class FilterBuilder extends Scope
                     continue;
                 }
                 $values = array_merge($values, $parsed);
+            }
+
+            // If we have no values, ignore the filter
+            if (!$values) {
+                continue;
             }
 
             $query->where(function ($query) use ($json, $handle, $operator, $values) {
