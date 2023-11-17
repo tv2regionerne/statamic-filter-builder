@@ -25,10 +25,13 @@ When configuring the `Data Feed Filters` field within a blueprint you may select
 <img src="images/fieldtype-setup.png" />
 
 ## Unleash Advanced Functionality with Antlers
-For those who seek advanced control, this addon leverages Antlers, Statamic's templating language, enabling you to inject dynamic variables directly into your queries. Variables can be sourced from the Cascade of Antlers, allowing you to use elements like `{{ page.title }} as a dynamic value in your filtering logic.
+For those who seek advanced control, this addon leverages Antlers, Statamic's templating language, enabling you to inject dynamic variables directly into your queries. 
+
+Variables can be sourced from the Cascade of Antlers, allowing you to use elements like `{{ page.title }}` as a dynamic value in your filtering logic.
 
 ### Advanced Use Case Example:
-Imagine you want to display articles that share the same location as the current page. The Antlers code for this would be succinct and efficient:
+Imagine you want to display articles that share the same location as the current page. 
+The Antlers code for this would be something like this:
 
 ```antlers
 {{ page.locations | pluck('id') | to_json }}
@@ -38,7 +41,7 @@ By using `pluck('id')`, you ensure that the returned data is a flat array of IDs
 Here’s how to apply this advanced filter within your template:
 
 ```antlers
-{{ collection:articles query_scope="filter_builder" :filter_builder="{page.locations | pluck('id') | to_json}" }}
+{{ collection:articles query_scope="filter_builder" :filter_builder="my_filter_builder_field_handle" }}
     <!-- Articles that match the locations of the current page will be displayed -->
 {{ /collection:articles }}
 ```
