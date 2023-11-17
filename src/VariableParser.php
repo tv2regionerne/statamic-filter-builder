@@ -28,6 +28,11 @@ class VariableParser
             $decoded = preg_split('/\s*,\s*/', $parsed);
         }
 
+        // array is multidimensional. Don't return it to the query
+        if (count($decoded)!==count($decoded,COUNT_RECURSIVE)) {
+            return;
+        }
+
         return Arr::map(Arr::wrap($decoded), function ($value) {
             return self::castValue($value);
         });
@@ -54,7 +59,7 @@ class VariableParser
             return true;
         } elseif ($value === 0 || $value === '0') {
             return false;
-        } elseif (Carbon::canBeCreatedFromFormat($value, 'Y-m-d H:i:s')) {
+        } elseif (is_string($value) && Carbon::canBeCreatedFromFormat($value, 'Y-m-d H:i:s')) {
             return Carbon::createFromFormat('Y-m-d H:i:s', $value);
         }
 
