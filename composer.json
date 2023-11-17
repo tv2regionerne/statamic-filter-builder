@@ -1,5 +1,8 @@
 {
     "name": "tv2regionerne/statamic-filter-builder",
+    "scripts": {
+        "test": "./vendor/bin/pest"
+    },
     "autoload": {
         "psr-4": {
             "Tv2regionerne\\StatamicFilterBuilder\\": "src"
