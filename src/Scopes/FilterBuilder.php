@@ -20,7 +20,7 @@ class FilterBuilder extends Scope
         foreach ($filters as $filter) {
             $handle = $filter['handle'];
             $operator = $filter['values']['operator'];
-            $values = $filter['values']['values'] = [];
+            $values = $filter['values']['values'] ?? [];
             $variables = $filter['values']['variables'];
 
             $field = $fields[$handle];
