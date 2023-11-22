@@ -1,8 +1,8 @@
 <template>
 
-    <div class="replicator-set shadow-sm mb-2 rounded border">
-        <div class="replicator-set-header">
-            <div class="py-2 pl-2 replicator-set-header-inner flex justify-between items-end w-full">
+    <div class="replicator-set mb-2">
+        <div class="replicator-set-header p-0" :class="{ 'collapsed': collapsed }">
+            <div class="flex items-center justify-between flex-1 p-2 replicator-set-header-inner cursor-pointer" @click="toggleCollapsed">
                 <div class="text-sm leading-none">
                     {{ field.display }}
                 </div>
@@ -11,7 +11,7 @@
                 </button>
             </div>
         </div>
-        <div class="replicator-set-body flex-1 publish-fields @container">
+        <div class="replicator-set-body flex-1 publish-fields @container" v-show="!collapsed">
             <set-field
                 v-for="field in fields"
                 :key="field.handle"
@@ -54,6 +54,9 @@ export default {
         readOnly: {},
         parentName: {},
         index: {},
+        collapsed: {
+            default: false,
+        },
     },
 
     computed: {
@@ -75,6 +78,22 @@ export default {
                 ...this.meta,
                 [handle]: meta,
             });
+        },
+
+        toggleCollapsed() {
+            if (this.collapsed) {
+                this.expand();
+            } else {
+                this.collapse();
+            }
+        },
+
+        collapse() {
+            this.$emit('collapsed');
+        },
+
+        expand() {
+            this.$emit('expanded');
         },
 
         fieldPath(field) {

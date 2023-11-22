@@ -18,6 +18,9 @@
                     :read-only="isReadOnly"
                     :parent-name="name"
                     :index="index"
+                    :collapsed="collapsed.includes(filter.id)"
+                    @collapsed="collapseFilter(filter.id)"
+                    @expanded="expandFilter(filter.id)"
                     @updated="updateFilter(index, $event)"
                     @meta-updated="updateFilterMeta(filter.id, $event)"
                     @removed="removeFilter(index)"
@@ -57,6 +60,12 @@ export default {
     },
     
     inject: ['storeName'],
+
+    data() {
+        return {
+            collapsed: this.value.map(fitler => fitler.id),
+        };
+    },
 
     computed: {
 
@@ -121,6 +130,19 @@ export default {
             ]);
         },
 
+        collapseFilter(id) {
+            if (!this.collapsed.includes(id)) {
+                this.collapsed.push(id);
+            }
+        },
+
+        expandFilter(id) {
+            if (this.collapsed.includes(id)) {
+                var index = this.collapsed.indexOf(id);
+                this.collapsed.splice(index, 1);
+            }
+        },
+
         filterMeta(id) {
             return this.meta.existing[id];
         },
@@ -145,7 +167,10 @@ export default {
         width: 20% !important;
     }
     .\@lg\:w-1\/2 {
-        width: 40% !important;
+        width: 80% !important;
+    }
+    .\@lg\:w-1\/2 + .\@lg\:w-1\/2 {
+        margin-left: 20% !important;
     }
 }
 .filter_builder-dropdown {
