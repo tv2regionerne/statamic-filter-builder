@@ -191,7 +191,10 @@ class FilterBuilder extends Fieldtype
                     ->fields()
                     ->all()
                     ->filter->isFilterable();
-            }));
+            }))
+            ->sort(function ($a, $b) {
+                return $a->display() <=> $b->display();
+            });
     }
 
     protected function filterFields($filter)
