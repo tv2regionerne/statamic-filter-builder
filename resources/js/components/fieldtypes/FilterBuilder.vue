@@ -7,35 +7,21 @@
         <div v-if="!loading">
 
             <div class="">
-                <div v-for="filter, index in value" class="replicator-set shadow-sm mb-2 rounded border">
-                    <div class="replicator-set-header">
-                        <div class="py-2 pl-2 replicator-set-header-inner flex justify-between items-end w-full">
-                            <div class="text-sm leading-none">
-                                {{ filterlabel(filter) }}
-                            </div>
-                            <button class="flex self-end group items-center" @click="removeFilter(index)" :aria-label="__('statamic-filter-builder::fieldtypes.filter_builder.delete_filter')">
-                                <svg-icon name="micro/trash" class="w-4 h-4 text-gray-600 group-hover:text-gray-900" />
-                            </button>
-                        </div>
-                    </div>
-                    <div class="replicator-set-body flex-1 publish-fields @container">
-                        <set-field
-                            v-for="field in filterFields[filter.type][filter.handle]"
-                            :key="field.handle"
-                            :field="field"
-                            :value="filter.values[field.handle]"
-                            :meta="filterFieldMeta(filter.id, filter.handle, field.handle)"
-                            :parent-name="name"
-                            :set-index="index"
-                            :errors="filterFieldErrors(index, field.handle)"
-                            :field-path="filterFieldPath(index, field.handle)"
-                            :read-only="isReadOnly"
-                            v-show="true || showField(field.field, filterFieldPath(index, field.handle))"
-                            @updated="($event) => updateFilterField(index, field.handle, $event)"
-                            @meta-updated="($event) => updateFilterMeta(filter.id, field.handle, $event)"
-                        />
-                    </div>
-                </div>
+                <filter-item
+                    v-for="filter, index in value"
+                    :filter="filter"
+                    :field="fieldsObject[filter.handle]"
+                    :values="filter.values"
+                    :fields="filterFields[filter.type][filter.handle]"
+                    :meta="filterMeta(filter.id)"
+                    :field-path-prefix="filterPath(index)"
+                    :read-only="isReadOnly"
+                    :parent-name="name"
+                    :index="index"
+                    @updated="updateFilter(index, $event)"
+                    @meta-updated="updateFilterMeta(filter.id, $event)"
+                    @removed="removeFilter(index)"
+                    />
             </div>
 
             <div class="flex">
@@ -56,6 +42,7 @@
 </template>
 
 <script>
+import FilterItem from './FilterItem.vue';
 const { ValidatesFieldConditions } = FieldConditions;
 
 export default {
@@ -64,6 +51,10 @@ export default {
         Fieldtype,
         ValidatesFieldConditions,
     ],
+
+    components: {
+        FilterItem,
+    },
     
     inject: ['storeName'],
 
@@ -105,38 +96,20 @@ export default {
             });
         },
 
-        resetFilter(index, handle) {
-            const { type } = this.value[index];
+        updateFilter(index, values) {
             this.update([
                 ...this.value.slice(0, index),
-                { type, handle, values: this.meta.defaults[handle] },
+                { ...this.value[index], values },
                 ...this.value.slice(index + 1),
             ]);
         },
 
-        updateFilterField(index, handle, value) {
-            this.update([
-                ...this.value.slice(0, index),
-                {
-                    ...this.value[index],
-                    values: {
-                        ...this.value[index].values,
-                        [handle]: value,
-                    }
-                },
-                ...this.value.slice(index + 1),
-            ]);
-        },
-
-        updateFilterMeta(id, handle, meta) {
+        updateFilterMeta(id, meta) {
             this.updateMeta({
                 ...this.meta,
                 existing: {
                     ...this.meta.existing,
-                    [id]: {
-                        ...this.meta.existing[id],
-                        [handle]: meta,
-                    },
+                    [id]: meta,
                 },
             });
         },
@@ -148,26 +121,12 @@ export default {
             ]);
         },
 
-        filterlabel(filter) {
-            const type = {
-                field: 'Field',
-            }[filter.type];
-            const handle = this.fieldsObject[filter.handle].display;
-            return `${handle}`;
+        filterMeta(id) {
+            return this.meta.existing[id];
         },
 
-        filterFieldMeta(id, filter, handle) {
-            return this.meta.existing[id][handle];
-        },
-
-        filterFieldPath(index, handle) {
-            return `${this.handle}.${index}.values.${handle}`;
-        },
-
-        filterFieldErrors(index, handle) {
-            const state = this.$store.state.publish[this.storeName];
-            if (! state) return [];
-            return state.errors[this.filterFieldPath(index, handle)] || [];
+        filterPath(index) {
+            return `${this.handle}.${index}`;
         },
 
     },
