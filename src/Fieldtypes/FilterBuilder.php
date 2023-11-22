@@ -177,24 +177,40 @@ class FilterBuilder extends Fieldtype
 
         $collections = $this->config('collections');
 
-        return $this->fields = collect([
-            'id' => new Field('id', [
-                'display' => 'ID',
-                'type' => 'text',
-            ]),
-        ])->merge(collect(Arr::wrap($collections))
-            ->flatMap(function ($collection) {
-                return Collection::findByHandle($collection)->entryBlueprints();
-            })
-            ->flatMap(function ($blueprint) {
-                return $blueprint
-                    ->fields()
-                    ->all()
-                    ->filter->isFilterable();
-            }))
+        $groups = collect(Arr::wrap($collections))
+            ->mapWithKeys(function ($collection) {
+                $fields = Collection::findByHandle($collection)->entryBlueprints()
+                    ->flatMap(function ($blueprint) {
+                        return $blueprint
+                            ->fields()
+                            ->all()
+                            ->filter->isFilterable();
+                    });
+
+                return [$collection => $fields];
+            });
+
+        $handles = $groups
+            ->flatMap(fn ($fields) => $fields->keys())
+            ->unique();
+        foreach ($groups as $fields) {
+            $handles = $handles->intersect($fields->keys());
+        }
+
+        $fields = $groups
+            ->flatMap(fn ($fields) => $fields)
+            ->only($handles)
+            ->merge([
+                'id' => new Field('id', [
+                    'display' => 'ID',
+                    'type' => 'text',
+                ]),
+            ])
             ->sort(function ($a, $b) {
                 return $a->display() <=> $b->display();
             });
+
+        return $fields;
     }
 
     protected function filterFields($filter)
