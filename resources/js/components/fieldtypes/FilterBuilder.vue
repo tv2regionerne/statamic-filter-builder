@@ -28,14 +28,15 @@
             </div>
 
             <div class="flex">
-                <popover ref="addFilterDropdowm" class="dropdown-list filter_builder-dropdown" placement="bottom-start">
-                    <template #trigger>
-                        <button class="btn">
-                            {{ __('statamic-filter-builder::fieldtypes.filter_builder.add_filter') }}
-                        </button>
-                    </template>
-                    <button v-for="field in meta.fields" v-text="field.display" @click="addFilter('field', field.handle)" />
-                </popover>
+                <v-select
+                    :append-to-body="true"
+                    class="w-52"
+                    :placeholder="__('statamic-filter-builder::fieldtypes.filter_builder.add_filter')"
+                    :options="fieldsOptions"
+                    :reduce="option => option.value"
+                    :value="null"
+                    @input="addFilter('field', $event)"
+                />
             </div>
 
         </div>
@@ -76,6 +77,13 @@ export default {
             ])));
         },
 
+        fieldsOptions() {
+            return this.meta.fields.map(field => ({
+                value: field.handle,
+                label: field.display,
+            }));
+        },
+
         filterFields() {
             return {
                 field: Object.fromEntries(this.meta.fields.map(field => ([
@@ -91,7 +99,6 @@ export default {
 
         addFilter(type, handle) {
             const id = uniqid();
-            this.$refs.addFilterDropdowm.close();
             this.update([
                 ...this.value,
                 { id, type, handle, values: this.meta.defaults[handle] },
