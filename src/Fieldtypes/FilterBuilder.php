@@ -25,12 +25,34 @@ class FilterBuilder extends Fieldtype
             [
                 'display' => __('Appearance & Behavior'),
                 'fields' => [
+                    'mode' => [
+                        'display' => __('Mode'),
+                        'instructions' => __('The collection listing source'),
+                        'type' => 'button_group',
+                        'default' => 'config',
+                        'options' => [
+                            'config' => __('Field Configuration'),
+                            'field' => __('Blueprint Field'),
+                        ],
+                    ],
                     'collections' => [
                         'display' => __('Collections'),
                         'instructions' => __('The filtered collections'),
                         'mode' => 'select',
                         'type' => 'collections',
-                        'validate' => 'required_without:{this}.variables',
+                        'validate' => 'required_if:mode,config',
+                        'if' => [
+                            'mode' => 'config',
+                        ],
+                    ],
+                    'field' => [
+                        'display' => __('Field'),
+                        'instructions' => __('The field listing the filtered collections'),
+                        'type' => 'text',
+                        'validate' => 'required_if:mode,field',
+                        'if' => [
+                            'mode' => 'field',
+                        ],
                     ],
                 ],
             ],
@@ -41,7 +63,7 @@ class FilterBuilder extends Fieldtype
     {
         return collect($data)->map(function ($filter) {
             $filter['id'] = $filter['id'] ?? RowId::generate();
-            $fields = $this->filterFields($filter);
+            $fields = $this->getFilterFields($filter);
             $values = $filter['values'];
             $values = $fields
                 ->addValues($values)
@@ -61,7 +83,7 @@ class FilterBuilder extends Fieldtype
     {
         return collect($data)->map(function ($filter) {
             $filter['id'] = $filter['id'] ?? RowId::generate();
-            $fields = $this->filterFields($filter);
+            $fields = $this->getFilterFields($filter);
             $values = $filter['values'];
             if (in_array($fields->get('values')->type(), $this->singleTypes)) {
                 $values['values'] = $values['values'][0];
@@ -80,7 +102,7 @@ class FilterBuilder extends Fieldtype
     public function preProcessValidatable($data)
     {
         return collect($data)->map(function ($filter) {
-            $fields = $this->filterFields($filter);
+            $fields = $this->getFilterFields($filter);
             $values = $filter['values'];
             $processed = $fields
                 ->addValues($filter['values'])
@@ -97,7 +119,7 @@ class FilterBuilder extends Fieldtype
     {
         return collect($this->field->value())->map(function ($filter, $index) {
             $prefix = $this->field->handle().'.'.$index.'.values';
-            $fields = $this->filterFields($filter);
+            $fields = $this->getFilterFields($filter);
             $values = $filter['values'];
             $rules = $fields
                 ->addValues($values)
@@ -120,7 +142,7 @@ class FilterBuilder extends Fieldtype
     {
         return collect($this->field->value())->map(function ($filter, $index) {
             $prefix = $this->field->handle().'.'.$index.'.values';
-            $fields = $this->filterFields($filter);
+            $fields = $this->getFilterFields($filter);
             $values = $filter['values'];
             $attributes = $fields
                 ->addValues($values)
@@ -138,27 +160,27 @@ class FilterBuilder extends Fieldtype
 
     public function preload()
     {
-        $fields = $this->fields()->map(function ($field) {
+        $fields = $this->getFields()->map(function ($field) {
             return [
                 'handle' => $field->handle(),
                 'display' => $field->display(),
                 'type' => $field->type(),
-                'fields' => $this->fieldFields($field)->toPublishArray(),
+                'fields' => $this->getFieldFields($field)->toPublishArray(),
             ];
         })->values();
 
         $existing = collect($this->field->value())->mapWithKeys(function ($filter) {
-            return [$filter['id'] => $this->filterFields($filter)->addValues($filter['values'])->meta()];
+            return [$filter['id'] => $this->getFilterFields($filter)->addValues($filter['values'])->meta()];
         })->toArray();
 
-        $defaults = $this->fields()->map(function ($field) {
-            return $this->fieldFields($field)->all()->map(function ($field) {
+        $defaults = $this->getFields()->map(function ($field) {
+            return $this->getFieldFields($field)->all()->map(function ($field) {
                 return $field->fieldtype()->preProcess($field->defaultValue());
             })->all();
         })->all();
 
-        $new = $this->fields()->map(function ($field, $handle) use ($defaults) {
-            return $this->fieldFields($field)->addValues($defaults[$handle])->meta();
+        $new = $this->getFields()->map(function ($field, $handle) use ($defaults) {
+            return $this->getFieldFields($field)->addValues($defaults[$handle])->meta();
         })->toArray();
 
         return [
@@ -169,13 +191,15 @@ class FilterBuilder extends Fieldtype
         ];
     }
 
-    protected function fields()
+    protected function getFields()
     {
         if ($this->fields) {
             return $this->fields;
         }
 
-        $collections = $this->config('collections');
+        $collections = $this->config('mode', 'config') === 'config'
+            ? $this->config('collections')
+            : $this->field->parent()->get($this->config('field'));
 
         $groups = collect(Arr::wrap($collections))
             ->mapWithKeys(function ($collection) {
@@ -197,7 +221,7 @@ class FilterBuilder extends Fieldtype
             $handles = $handles->intersect($fields->keys());
         }
 
-        $fields = $groups
+        $this->fields = $groups
             ->flatMap(fn ($fields) => $fields)
             ->only($handles)
             ->merge([
@@ -210,15 +234,15 @@ class FilterBuilder extends Fieldtype
                 return $a->display() <=> $b->display();
             });
 
-        return $fields;
+        return $this->fields;
     }
 
-    protected function filterFields($filter)
+    protected function getFilterFields($filter)
     {
-        return $this->fieldFields($this->fields()[$filter['handle']]);
+        return $this->getFieldFields($this->getFields()[$filter['handle']]);
     }
 
-    protected function fieldFields(Field $field)
+    protected function getFieldFields(Field $field)
     {
         $fieldItems = match ($field->type()) {
             'toggle' => [

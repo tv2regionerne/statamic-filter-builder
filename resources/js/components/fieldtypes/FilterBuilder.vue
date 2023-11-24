@@ -2,43 +2,37 @@
 
     <div>
 
-        <loading-graphic v-if="loading" :text="false" />
-
-        <div v-if="!loading">
-
-            <div class="">
-                <filter-item
-                    v-for="filter, index in value"
-                    :filter="filter"
-                    :field="fieldsObject[filter.handle]"
-                    :values="filter.values"
-                    :fields="filterFields[filter.type][filter.handle]"
-                    :meta="filterMeta(filter.id)"
-                    :field-path-prefix="filterPath(index)"
-                    :read-only="isReadOnly"
-                    :parent-name="name"
-                    :index="index"
-                    :collapsed="collapsed.includes(filter.id)"
-                    @collapsed="collapseFilter(filter.id)"
-                    @expanded="expandFilter(filter.id)"
-                    @updated="updateFilter(index, $event)"
-                    @meta-updated="updateFilterMeta(filter.id, $event)"
-                    @removed="removeFilter(index)"
-                    />
-            </div>
-
-            <div class="flex">
-                <v-select
-                    :append-to-body="true"
-                    class="w-52"
-                    :placeholder="__('statamic-filter-builder::fieldtypes.filter_builder.add_filter')"
-                    :options="fieldsOptions"
-                    :reduce="option => option.value"
-                    :value="null"
-                    @input="addFilter('field', $event)"
+        <div class="">
+            <filter-item
+                v-for="filter, index in value"
+                :filter="filter"
+                :field="fieldsObject[filter.handle]"
+                :values="filter.values"
+                :fields="filterFields[filter.type][filter.handle]"
+                :meta="filterMeta(filter.id)"
+                :field-path-prefix="filterPath(index)"
+                :read-only="isReadOnly"
+                :parent-name="name"
+                :index="index"
+                :collapsed="collapsed.includes(filter.id)"
+                @collapsed="collapseFilter(filter.id)"
+                @expanded="expandFilter(filter.id)"
+                @updated="updateFilter(index, $event)"
+                @meta-updated="updateFilterMeta(filter.id, $event)"
+                @removed="removeFilter(index)"
                 />
-            </div>
+        </div>
 
+        <div class="flex">
+            <v-select
+                :append-to-body="true"
+                class="w-52"
+                :placeholder="__('statamic-filter-builder::fieldtypes.filter_builder.add_filter')"
+                :options="fieldsOptions"
+                :reduce="option => option.value"
+                :value="null"
+                @input="addFilter('field', $event)"
+            />
         </div>
 
     </div>
@@ -93,9 +87,35 @@ export default {
             };
         },
 
+        mode() {
+            return this.config.mode || 'config';
+        },
+        
+        collections() {
+            const store = this.$store.state.publish[this.storeName];
+            const prefix = this.fieldPathPrefix || '';
+            const key = prefix.slice(0, -this.handle.length) + this.config.field;
+            return data_get(store.values, key);
+        },
+
     },
 
     methods: {
+
+        loadCollectionsMeta(collections) {
+            const params = {
+                config: utf8btoa(JSON.stringify({
+                    ...this.config,
+                    mode: 'config',
+                    collections: collections,
+                 })),
+            };
+
+            this.$axios.get(cp_url('fields/field-meta'), { params }).then(response => {
+                this.meta = response.data.meta;
+                this.value = response.data.value;
+            });
+        },
 
         addFilter(type, handle) {
             const id = uniqid();
@@ -158,6 +178,20 @@ export default {
             return `${this.handle}.${index}`;
         },
 
+    },
+
+    watch: {
+        collections: function (collections, oldCollections) {
+            if (JSON.stringify(collections) === JSON.stringify(oldCollections)) {
+                return;                
+            }
+            this.update([]);
+            this.updateMeta({
+                ...this.meta,
+                existing: {},
+            });
+            this.loadCollectionsMeta(collections);
+        }
     },
 
 };
