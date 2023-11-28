@@ -154,9 +154,7 @@ trait UsesFields
             return $this->fields;
         }
 
-        $collections = $this->config('mode', 'config') === 'config'
-            ? $this->config('collections')
-            : $this->field->parent()->get($this->config('field'));
+        $collections = $this->getCollections();
 
         $groups = collect(Arr::wrap($collections))
             ->mapWithKeys(function ($collection) {
@@ -196,5 +194,18 @@ trait UsesFields
     protected function getItemFields($item)
     {
         return $this->getFieldFields($this->getFields()[$item['handle']]);
+    }
+
+    protected function getCollections()
+    {
+        if ($this->config('mode', 'config') === 'config') {
+            return $this->config('collections');
+        }
+
+        $key = $this->field->fieldPathKeys();
+        array_splice($key, -1, 1, [$this->config('field')]);
+        $key = implode('.', $key);
+
+        return data_get($this->field->parent()->data(), $key);
     }
 }
