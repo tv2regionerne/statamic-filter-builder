@@ -50,6 +50,17 @@ class SortBuilder extends Fieldtype
         ];
     }
 
+    public function augment($value)
+    {
+        if (! $value) {
+            return;
+        }
+
+        return collect($value)
+            ->map(fn ($sort) => $sort['handle'].':'.$sort['values']['direction'])
+            ->join('|');
+    }
+
     protected function getFieldFields(Field $field)
     {
         $fieldItems = [
