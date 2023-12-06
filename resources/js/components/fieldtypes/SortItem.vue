@@ -2,11 +2,14 @@
 
     <div class="replicator-set mb-2">
         <div class="replicator-set-header p-0" :class="{ 'collapsed': collapsed }">
-            <div class="flex items-center justify-between flex-1 p-2 replicator-set-header-inner cursor-pointer" @click="toggleCollapsed">
-                <div class="text-sm leading-none">
+            <div class="flex items-center justify-between flex-1 px-2 py-1.5 replicator-set-header-inner cursor-pointer" @click="toggleCollapsed">
+                <label class="text-xs whitespace-nowrap mr-2">
                     {{ field.display }}
+                </label>
+                <div v-show="collapsed" class="flex-1 min-w-0 w-1 pr-8">
+                    <div v-html="previewText" class="help-block mb-0 whitespace-nowrap overflow-hidden text-ellipsis" />
                 </div>
-                <button class="flex self-end group items-center" @click="$emit('removed')" :aria-label="__('statamic-filter-builder::fieldtypes.sort_builder.delete_sort')">
+                <button class="flex group items-center" @click="$emit('removed')" :aria-label="__('statamic-filter-builder::fieldtypes.sort_builder.delete_sort')">
                     <svg-icon name="micro/trash" class="w-4 h-4 text-gray-600 group-hover:text-gray-900" />
                 </button>
             </div>
@@ -26,6 +29,7 @@
                 v-show="showField(field, fieldPath(field))"
                 @updated="update(field.handle, $event)"
                 @meta-updated="updateMeta(field.handle, $event)"
+                @replicator-preview-updated="updatePreview(field.handle, $event)"
             />
         </div>
     </div>
@@ -33,12 +37,15 @@
 </template>
 
 <script>
+import ManagesPreviewText from './Mixins/ManagesPreviewText.js';
+
 const { ValidatesFieldConditions } = FieldConditions;
 
 export default {
 
     mixins: [
         ValidatesFieldConditions,
+        ManagesPreviewText,
     ],
     
     inject: ['storeName'],
@@ -49,6 +56,7 @@ export default {
         values: {},
         fields: {},
         meta: {},
+        previews: {},
         errors: {},
         fieldPathPrefix: {},
         readOnly: {},
@@ -59,9 +67,10 @@ export default {
         },
     },
 
-    computed: {
-
-
+    data() {
+        return {
+            fieldPreviews: this.previews,
+        }
     },
 
     methods: {
@@ -77,6 +86,13 @@ export default {
             this.$emit('meta-updated', {
                 ...this.meta,
                 [handle]: meta,
+            });
+        },
+
+        updatePreview(handle, preview) {
+            this.$emit('previews-updated', this.fieldPreviews = {
+                ...this.fieldPreviews,
+                [handle]: preview,
             });
         },
 

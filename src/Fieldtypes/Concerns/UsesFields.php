@@ -140,11 +140,18 @@ trait UsesFields
             return $this->getFieldFields($field)->addValues($defaults[$handle])->meta();
         })->toArray();
 
+        $previews = collect($existing)->map(function ($fields) {
+            return collect($fields)->map(function () {
+                return null;
+            })->all();
+        })->all();
+
         return [
             'fields' => $fields,
             'existing' => $existing,
             'new' => $new,
             'defaults' => $defaults,
+            'previews' => $previews,
         ];
     }
 

@@ -10,6 +10,7 @@
                 :values="sort.values"
                 :fields="itemFields[sort.type][sort.handle]"
                 :meta="itemMeta(sort.id)"
+                :previews="itemPreviews(sort.id)"
                 :field-path-prefix="itemPath(index)"
                 :read-only="isReadOnly"
                 :parent-name="name"
@@ -20,6 +21,7 @@
                 @updated="updateItem(index, $event)"
                 @meta-updated="updateItemMeta(sort.id, $event)"
                 @removed="removeItem(index)"
+                @previews-updated="updateItemPreviews(sort.id, $event)"
                 />
         </div>
 

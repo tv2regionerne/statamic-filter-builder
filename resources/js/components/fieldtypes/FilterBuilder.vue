@@ -10,6 +10,7 @@
                 :values="filter.values"
                 :fields="itemFields[filter.type][filter.handle]"
                 :meta="itemMeta(filter.id)"
+                :previews="itemPreviews(filter.id)"
                 :field-path-prefix="itemPath(index)"
                 :read-only="isReadOnly"
                 :parent-name="name"
@@ -20,6 +21,7 @@
                 @updated="updateItem(index, $event)"
                 @meta-updated="updateItemMeta(filter.id, $event)"
                 @removed="removeItem(index)"
+                @previews-updated="updateItemPreviews(filter.id, $event)"
                 />
         </div>
 

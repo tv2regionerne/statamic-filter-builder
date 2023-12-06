@@ -10,6 +10,7 @@ export default {
     data() {
         return {
             collapsed: this.value.map(item => item.id),
+            previews: this.meta.previews,
         };
     },
 
@@ -75,6 +76,10 @@ export default {
             });
         },
 
+        updateItemPreviews(id, previews) {
+            this.previews[id] = previews;
+        },
+
         removeItem(index) {
             this.update([
                 ...this.value.slice(0, index),
@@ -97,6 +102,10 @@ export default {
 
         itemMeta(id) {
             return this.meta.existing[id];
+        },
+
+        itemPreviews(id) {
+            return this.meta.previews[id];
         },
 
         itemPath(index) {
