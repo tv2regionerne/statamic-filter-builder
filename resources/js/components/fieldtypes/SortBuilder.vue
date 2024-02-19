@@ -5,6 +5,7 @@
         <div class="">
             <sort-item
                 v-for="sort, index in value"
+                :key="sort.id"
                 :sort="sort"
                 :field="fieldsObject[sort.handle]"
                 :values="sort.values"

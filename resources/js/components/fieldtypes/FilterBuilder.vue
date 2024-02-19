@@ -5,6 +5,7 @@
         <div class="">
             <filter-item
                 v-for="filter, index in value"
+                :key="filter.id"
                 :filter="filter"
                 :field="fieldsObject[filter.handle]"
                 :values="filter.values"
