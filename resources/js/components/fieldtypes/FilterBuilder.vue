@@ -55,56 +55,6 @@ export default {
     components: {
         FilterItem,
     },
-    
-    inject: ['storeName'],
-
-    computed: {
-
-        mode() {
-            return this.config.mode || 'config';
-        },
-        
-        collections() {
-            const store = this.$store.state.publish[this.storeName];
-            const prefix = this.fieldPathPrefix || '';
-            const key = prefix.slice(0, -this.handle.length) + this.config.field;
-            return data_get(store.values, key);
-        },
-
-    },
-
-    methods: {
-
-        loadCollectionsMeta(collections) {
-            const params = {
-                config: utf8btoa(JSON.stringify({
-                    ...this.config,
-                    mode: 'config',
-                    collections: collections,
-                 })),
-            };
-
-            this.$axios.get(cp_url('fields/field-meta'), { params }).then(response => {
-                this.meta = response.data.meta;
-                this.value = response.data.value;
-            });
-        },
-
-    },
-
-    watch: {
-        collections: function (collections, oldCollections) {
-            if (JSON.stringify(collections) === JSON.stringify(oldCollections)) {
-                return;                
-            }
-            this.update([]);
-            this.updateMeta({
-                ...this.meta,
-                existing: {},
-            });
-            this.loadCollectionsMeta(collections);
-        }
-    },
 
 };
 </script>

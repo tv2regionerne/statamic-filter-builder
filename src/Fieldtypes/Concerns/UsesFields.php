@@ -213,6 +213,19 @@ trait UsesFields
         array_splice($key, -1, 1, [$this->config('field')]);
         $key = implode('.', $key);
 
-        return data_get($this->field->parent()->data(), $key);
+        // We have to do this because the collection fields value may have changed
+        // but the parent object has not yet been updated with the new value
+        if ($post = request()->post()) {
+            return data_get($post, $key);
+        }
+
+        // We have to check this becuase when a new entry is created the field
+        // parent wont yet be an entry object, it'll be the collection object
+        $parent = $this->field->parent();
+        if (method_exists($parent, 'data')) {
+            return data_get($parent->data(), $key);
+        }
+
+        return [];
     }
 }

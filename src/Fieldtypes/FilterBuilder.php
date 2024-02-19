@@ -64,6 +64,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'display' => __('Value'),
@@ -72,6 +73,7 @@ class FilterBuilder extends Fieldtype
                     'inline_display' => __('False'),
                     'inline_label_when_true' => __('True'),
                     'width' => 50,
+                    'replicator_preview' => true,
                 ],
             ],
             'date' => [
@@ -84,6 +86,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '<',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'date',
@@ -92,6 +95,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'integer', 'float' => [
@@ -116,6 +120,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'entries' => [
@@ -128,6 +133,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'entries',
@@ -138,6 +144,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'terms' => [
@@ -150,6 +157,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'terms',
@@ -160,6 +168,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'users' => [
@@ -172,6 +181,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'users',
@@ -181,6 +191,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             default => [
@@ -194,6 +205,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'list',
@@ -202,6 +214,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
         };
@@ -210,6 +223,7 @@ class FilterBuilder extends Fieldtype
             'type' => 'list',
             'display' => __('statamic-filter-builder::fieldtypes.filter_builder.variables'),
             'width' => 50,
+            'replicator_preview' => true,
             'validate' => [
                 'nullable',
                 function ($attribute, $value, $fail) {

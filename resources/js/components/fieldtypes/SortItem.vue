@@ -26,6 +26,7 @@
                 :errors="fieldErrors(field)"
                 :field-path="fieldPath(field)"
                 :read-only="isReadOnly"
+                :show-field-previews="true"
                 v-show="showField(field, fieldPath(field))"
                 @updated="update(field.handle, $event)"
                 @meta-updated="updateMeta(field.handle, $event)"

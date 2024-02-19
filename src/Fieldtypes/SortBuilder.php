@@ -73,6 +73,7 @@ class SortBuilder extends Fieldtype
                 ],
                 'default' => 'asc',
                 'width' => 25,
+                'replicator_preview' => true,
             ],
         ];
 
