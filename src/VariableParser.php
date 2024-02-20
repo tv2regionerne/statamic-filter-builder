@@ -29,7 +29,7 @@ class VariableParser
         }
 
         // array is multidimensional. Don't return it to the query
-        if (is_array($decoded) && count($decoded)!==count($decoded,COUNT_RECURSIVE)) {
+        if (is_array($decoded) && count($decoded) !== count($decoded, COUNT_RECURSIVE)) {
             return;
         }
 
