@@ -8,6 +8,7 @@ class ServiceProvider extends AddonServiceProvider
 {
     protected $fieldtypes = [
         Fieldtypes\FilterBuilder::class,
+        Fieldtypes\SortBuilder::class,
     ];
 
     protected $scopes = [

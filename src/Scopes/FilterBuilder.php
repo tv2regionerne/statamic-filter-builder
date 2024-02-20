@@ -35,7 +35,7 @@ class FilterBuilder extends Scope
             }
 
             // If we have no values, ignore the filter
-            if (!$values) {
+            if (! $values) {
                 continue;
             }
 

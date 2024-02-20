@@ -2,22 +2,14 @@
 
 namespace Tv2regionerne\StatamicFilterBuilder\Fieldtypes;
 
-use Facades\Statamic\Fieldtypes\RowId;
-use Statamic\Facades\Collection;
 use Statamic\Fields\Field;
 use Statamic\Fields\Fields;
 use Statamic\Fields\Fieldtype;
-use Statamic\Support\Arr;
 use Tv2regionerne\StatamicFilterBuilder\VariableParser;
 
 class FilterBuilder extends Fieldtype
 {
-    protected $fields;
-
-    protected $singleTypes = [
-        'toggle',
-        'date',
-    ];
+    use Concerns\UsesFields;
 
     protected function configFieldItems(): array
     {
@@ -25,181 +17,41 @@ class FilterBuilder extends Fieldtype
             [
                 'display' => __('Appearance & Behavior'),
                 'fields' => [
+                    'mode' => [
+                        'display' => __('Mode'),
+                        'instructions' => __('The collection listing source'),
+                        'type' => 'button_group',
+                        'default' => 'config',
+                        'options' => [
+                            'config' => __('Field Configuration'),
+                            'field' => __('Blueprint Field'),
+                        ],
+                    ],
                     'collections' => [
                         'display' => __('Collections'),
                         'instructions' => __('The filtered collections'),
                         'mode' => 'select',
                         'type' => 'collections',
-                        'validate' => 'required_without:{this}.variables',
+                        'validate' => 'required_if:mode,config',
+                        'if' => [
+                            'mode' => 'config',
+                        ],
+                    ],
+                    'field' => [
+                        'display' => __('Field'),
+                        'instructions' => __('The field listing the filtered collections'),
+                        'type' => 'text',
+                        'validate' => 'required_if:mode,field',
+                        'if' => [
+                            'mode' => 'field',
+                        ],
                     ],
                 ],
             ],
         ];
     }
 
-    public function process($data)
-    {
-        return collect($data)->map(function ($filter) {
-            $filter['id'] = $filter['id'] ?? RowId::generate();
-            $fields = $this->filterFields($filter);
-            $values = $filter['values'];
-            $values = $fields
-                ->addValues($values)
-                ->process()
-                ->values()
-                ->all();
-            if (in_array($fields->get('values')->type(), $this->singleTypes)) {
-                $values['values'] = [$values['values']];
-            }
-            $filter['values'] = $values;
-
-            return $filter;
-        })->all();
-    }
-
-    public function preProcess($data)
-    {
-        return collect($data)->map(function ($filter) {
-            $filter['id'] = $filter['id'] ?? RowId::generate();
-            $fields = $this->filterFields($filter);
-            $values = $filter['values'];
-            if (in_array($fields->get('values')->type(), $this->singleTypes)) {
-                $values['values'] = $values['values'][0];
-            }
-            $values = $fields
-                ->addValues($values)
-                ->preProcess()
-                ->values()
-                ->all();
-            $filter['values'] = $values;
-
-            return $filter;
-        })->all();
-    }
-
-    public function preProcessValidatable($data)
-    {
-        return collect($data)->map(function ($filter) {
-            $fields = $this->filterFields($filter);
-            $values = $filter['values'];
-            $processed = $fields
-                ->addValues($filter['values'])
-                ->preProcessValidatables()
-                ->values()
-                ->all();
-            $filter['values'] = array_merge($values, $processed);
-
-            return $filter;
-        })->all();
-    }
-
-    public function extraRules(): array
-    {
-        return collect($this->field->value())->map(function ($filter, $index) {
-            $prefix = $this->field->handle().'.'.$index.'.values';
-            $fields = $this->filterFields($filter);
-            $values = $filter['values'];
-            $rules = $fields
-                ->addValues($values)
-                ->validator()
-                ->withContext([
-                    'prefix' => $this->field->validationContext('prefix').$prefix.'.',
-                ])
-                ->rules();
-
-            return collect($rules)
-                ->mapWithKeys(function ($rules, $handle) use ($prefix) {
-                    return [$prefix.'.'.$handle => $rules];
-                })->all();
-        })->reduce(function ($carry, $rules) {
-            return $carry->merge($rules);
-        }, collect())->all();
-    }
-
-    public function extraValidationAttributes(): array
-    {
-        return collect($this->field->value())->map(function ($filter, $index) {
-            $prefix = $this->field->handle().'.'.$index.'.values';
-            $fields = $this->filterFields($filter);
-            $values = $filter['values'];
-            $attributes = $fields
-                ->addValues($values)
-                ->validator()
-                ->attributes();
-
-            return collect($attributes)
-                ->mapWithKeys(function ($rules, $handle) use ($prefix) {
-                    return [$prefix.'.'.$handle => $rules];
-                })->all();
-        })->reduce(function ($carry, $attributes) {
-            return $carry->merge($attributes);
-        }, collect())->all();
-    }
-
-    public function preload()
-    {
-        $fields = $this->fields()->map(function ($field) {
-            return [
-                'handle' => $field->handle(),
-                'display' => $field->display(),
-                'type' => $field->type(),
-                'fields' => $this->fieldFields($field)->toPublishArray(),
-            ];
-        })->values();
-
-        $existing = collect($this->field->value())->mapWithKeys(function ($filter) {
-            return [$filter['id'] => $this->filterFields($filter)->addValues($filter['values'])->meta()];
-        })->toArray();
-
-        $defaults = $this->fields()->map(function ($field) {
-            return $this->fieldFields($field)->all()->map(function ($field) {
-                return $field->fieldtype()->preProcess($field->defaultValue());
-            })->all();
-        })->all();
-
-        $new = $this->fields()->map(function ($field, $handle) use ($defaults) {
-            return $this->fieldFields($field)->addValues($defaults[$handle])->meta();
-        })->toArray();
-
-        return [
-            'fields' => $fields,
-            'existing' => $existing,
-            'new' => $new,
-            'defaults' => $defaults,
-        ];
-    }
-
-    protected function fields()
-    {
-        if ($this->fields) {
-            return $this->fields;
-        }
-
-        $collections = $this->config('collections');
-
-        return $this->fields = collect([
-            'id' => new Field('id', [
-                'display' => 'ID',
-                'type' => 'text',
-            ]),
-        ])->merge(collect(Arr::wrap($collections))
-            ->flatMap(function ($collection) {
-                return Collection::findByHandle($collection)->entryBlueprints();
-            })
-            ->flatMap(function ($blueprint) {
-                return $blueprint
-                    ->fields()
-                    ->all()
-                    ->filter->isFilterable();
-            }));
-    }
-
-    protected function filterFields($filter)
-    {
-        return $this->fieldFields($this->fields()[$filter['handle']]);
-    }
-
-    protected function fieldFields(Field $field)
+    protected function getFieldFields(Field $field)
     {
         $fieldItems = match ($field->type()) {
             'toggle' => [
@@ -212,6 +64,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'display' => __('Value'),
@@ -220,6 +73,7 @@ class FilterBuilder extends Fieldtype
                     'inline_display' => __('False'),
                     'inline_label_when_true' => __('True'),
                     'width' => 50,
+                    'replicator_preview' => true,
                 ],
             ],
             'date' => [
@@ -232,6 +86,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '<',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'date',
@@ -240,6 +95,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'integer', 'float' => [
@@ -264,6 +120,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'entries' => [
@@ -276,6 +133,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'entries',
@@ -286,6 +144,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'terms' => [
@@ -298,6 +157,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'terms',
@@ -308,6 +168,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             'users' => [
@@ -320,6 +181,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'users',
@@ -329,6 +191,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
             default => [
@@ -342,6 +205,7 @@ class FilterBuilder extends Fieldtype
                     ],
                     'default' => '=',
                     'width' => 25,
+                    'replicator_preview' => true,
                 ],
                 'values' => [
                     'type' => 'list',
@@ -350,6 +214,7 @@ class FilterBuilder extends Fieldtype
                     'validate' => [
                         'required_without:{this}.variables',
                     ],
+                    'replicator_preview' => true,
                 ],
             ],
         };
@@ -358,6 +223,7 @@ class FilterBuilder extends Fieldtype
             'type' => 'list',
             'display' => __('statamic-filter-builder::fieldtypes.filter_builder.variables'),
             'width' => 50,
+            'replicator_preview' => true,
             'validate' => [
                 'nullable',
                 function ($attribute, $value, $fail) {

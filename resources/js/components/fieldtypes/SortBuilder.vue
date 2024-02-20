@@ -3,26 +3,26 @@
     <div>
 
         <div class="">
-            <filter-item
-                v-for="filter, index in value"
-                :key="filter.id"
-                :filter="filter"
-                :field="fieldsObject[filter.handle]"
-                :values="filter.values"
-                :fields="itemFields[filter.type][filter.handle]"
-                :meta="itemMeta(filter.id)"
-                :previews="itemPreviews(filter.id)"
+            <sort-item
+                v-for="sort, index in value"
+                :key="sort.id"
+                :sort="sort"
+                :field="fieldsObject[sort.handle]"
+                :values="sort.values"
+                :fields="itemFields[sort.type][sort.handle]"
+                :meta="itemMeta(sort.id)"
+                :previews="itemPreviews(sort.id)"
                 :field-path-prefix="itemPath(index)"
                 :read-only="isReadOnly"
                 :parent-name="name"
                 :index="index"
-                :collapsed="collapsed.includes(filter.id)"
-                @collapsed="collapseItem(filter.id)"
-                @expanded="expandItem(filter.id)"
+                :collapsed="collapsed.includes(sort.id)"
+                @collapsed="collapseItem(sort.id)"
+                @expanded="expandItem(sort.id)"
                 @updated="updateItem(index, $event)"
-                @meta-updated="updateItemMeta(filter.id, $event)"
+                @meta-updated="updateItemMeta(sort.id, $event)"
                 @removed="removeItem(index)"
-                @previews-updated="updateItemPreviews(filter.id, $event)"
+                @previews-updated="updateItemPreviews(sort.id, $event)"
                 />
         </div>
 
@@ -30,7 +30,7 @@
             <v-select
                 :append-to-body="true"
                 class="w-52"
-                :placeholder="__('statamic-filter-builder::fieldtypes.filter_builder.add_filter')"
+                :placeholder="__('statamic-filter-builder::fieldtypes.sort_builder.add_sort')"
                 :options="fieldsOptions"
                 :reduce="option => option.value"
                 :value="null"
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import FilterItem from './FilterItem.vue';
+import SortItem from './SortItem.vue';
 import UsesFields from './Mixins/UsesFields.vue';
 
 export default {
@@ -54,13 +54,13 @@ export default {
     ],
 
     components: {
-        FilterItem,
+        SortItem,
     },
 
 };
 </script>
 <style>
-.filter_builder-fieldtype {
+.sort_builder-fieldtype {
     .replicator-set-body {
         padding: 0.5rem !important;
     }
@@ -77,7 +77,7 @@ export default {
         margin-left: 20% !important;
     }
 }
-.filter_builder-dropdown {
+.sort_builder-dropdown {
     .popover-content {
         max-height: 15.6rem;
         overflow: auto;
