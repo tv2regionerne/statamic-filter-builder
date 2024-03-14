@@ -14,7 +14,7 @@ class FilterBuilder extends Scope
 {
     public function apply($query, $values)
     {
-        $fields = $this->fields($values['from']);
+        $fields = $this->fields(explode('|', $values['from']));
         $filters = $values['filter_builder'] ?? [];
 
         foreach ($filters as $filter) {
