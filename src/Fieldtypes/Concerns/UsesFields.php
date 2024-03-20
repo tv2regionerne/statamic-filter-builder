@@ -38,22 +38,28 @@ trait UsesFields
 
     public function preProcess($data)
     {
-        return collect($data)->map(function ($item) {
-            $item['id'] = $item['id'] ?? RowId::generate();
-            $fields = $this->getItemFields($item);
-            $values = $item['values'];
-            if ($fields->has('values') && in_array($fields->get('values')->type(), $this->singleTypes)) {
-                $values['values'] = $values['values'][0];
-            }
-            $values = $fields
-                ->addValues($values)
-                ->preProcess()
-                ->values()
-                ->all();
-            $item['values'] = $values;
+         $fields = $this->getFields();
+         return collect($data)
+             ->filter(function($item) use (&$fields)  {
+                 return $fields->has($item['handle']);
+             })
+            ->map(function ($item) {
+                $item['id'] = $item['id'] ?? RowId::generate();
+                $fields = $this->getItemFields($item);
+                $values = $item['values'];
+                if ($fields->has('values') && in_array($fields->get('values')->type(), $this->singleTypes)) {
+                    $values['values'] = $values['values'][0];
+                }
+                $values = $fields
+                    ->addValues($values)
+                    ->preProcess()
+                    ->values()
+                    ->all();
+                $item['values'] = $values;
 
-            return $item;
-        })->all();
+                return $item;
+            })
+            ->all();
     }
 
     public function preProcessValidatable($data)
@@ -223,7 +229,7 @@ trait UsesFields
         // parent wont yet be an entry object, it'll be the collection object
         $parent = $this->field->parent();
         if (method_exists($parent, 'data')) {
-            return data_get($parent->data(), $key);
+            return data_get($parent->data(), $key) ?? [];
         }
 
         return [];
