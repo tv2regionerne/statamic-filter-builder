@@ -38,11 +38,12 @@ trait UsesFields
 
     public function preProcess($data)
     {
-         $fields = $this->getFields();
-         return collect($data)
-             ->filter(function($item) use (&$fields)  {
-                 return $fields->has($item['handle']);
-             })
+        $fields = $this->getFields();
+
+        return collect($data)
+            ->filter(function ($item) use (&$fields) {
+                return $fields->has($item['handle']);
+            })
             ->map(function ($item) {
                 $item['id'] = $item['id'] ?? RowId::generate();
                 $fields = $this->getItemFields($item);
@@ -168,6 +169,9 @@ trait UsesFields
         }
 
         $collections = $this->getCollections();
+        if (! $collections) {
+            return collect();
+        }
 
         $groups = collect(Arr::wrap($collections))
             ->mapWithKeys(function ($collection) {
