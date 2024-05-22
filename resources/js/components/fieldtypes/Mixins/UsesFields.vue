@@ -16,6 +16,12 @@ export default {
         };
     },
 
+    mounted() {
+        if (this.meta.fields.length === 0) {
+            this.loadCollectionsMeta(this.collections);
+        }
+    },
+
     computed: {
 
         mode() {

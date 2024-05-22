@@ -168,6 +168,9 @@ trait UsesFields
         }
 
         $collections = $this->getCollections();
+        if (! $collections) {
+            return collect();
+        }
 
         $groups = collect(Arr::wrap($collections))
             ->mapWithKeys(function ($collection) {
