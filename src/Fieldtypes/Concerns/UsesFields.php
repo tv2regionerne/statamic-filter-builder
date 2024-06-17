@@ -171,6 +171,9 @@ trait UsesFields
     protected function getFields()
     {
         $collections = collect(Arr::wrap($this->getCollections()));
+        if (! $collections->count()) {
+            return $collections;
+        }
 
         $key = 'filter-builder.fields.'.$collections->join('|');
 
