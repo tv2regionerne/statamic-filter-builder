@@ -124,14 +124,7 @@ trait UsesFields
 
     public function preload()
     {
-        $fields = $this->getFields()->map(function ($field) {
-            return [
-                'handle' => $field->handle(),
-                'display' => $field->display(),
-                'type' => $field->type(),
-                'fields' => $this->getFieldFields($field)->toPublishArray(),
-            ];
-        })->values();
+        $fields = $this->getFields();
 
         $existing = collect($this->field->value())
             ->filter(function ($item) use (&$fields) {
@@ -158,8 +151,17 @@ trait UsesFields
             })->all();
         })->all();
 
+        $publishFields = $fields->map(function ($field) {
+            return [
+                'handle' => $field->handle(),
+                'display' => $field->display(),
+                'type' => $field->type(),
+                'fields' => $this->getFieldFields($field)->toPublishArray(),
+            ];
+        })->values();
+
         return [
-            'fields' => $fields,
+            'fields' => $publishFields,
             'existing' => $existing,
             'new' => $new,
             'defaults' => $defaults,
