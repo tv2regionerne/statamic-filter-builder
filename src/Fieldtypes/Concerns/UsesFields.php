@@ -3,14 +3,13 @@
 namespace Tv2regionerne\StatamicFilterBuilder\Fieldtypes\Concerns;
 
 use Facades\Statamic\Fieldtypes\RowId;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Fields\Field;
 use Statamic\Support\Arr;
 
 trait UsesFields
 {
-    protected $fields;
-
     protected $singleTypes = [
         'toggle',
         'date',
@@ -171,16 +170,15 @@ trait UsesFields
 
     protected function getFields()
     {
-        if ($this->fields) {
-            return $this->fields;
+        $collections = collect(Arr::wrap($this->getCollections()));
+
+        $key = 'filter-builder.fields.'.$collections->join('|');
+
+        if (Blink::has($key)) {
+            return Blink::get($key);
         }
 
-        $collections = $this->getCollections();
-        if (! $collections) {
-            return collect();
-        }
-
-        $groups = collect(Arr::wrap($collections))
+        $groups = $collections
             ->mapWithKeys(function ($collection) {
                 $fields = Collection::findByHandle($collection)->entryBlueprints()
                     ->flatMap(function ($blueprint) {
@@ -199,7 +197,7 @@ trait UsesFields
             $handles = $handles->intersect($fields->keys());
         }
 
-        $this->fields = $groups
+        $fields = $groups
             ->flatMap(fn ($fields) => $fields)
             ->only($handles)
             ->merge([
@@ -212,7 +210,9 @@ trait UsesFields
                 return $a->display() <=> $b->display();
             });
 
-        return $this->fields;
+        Blink::put($key, $fields);
+
+        return $fields;
     }
 
     protected function getItemFields($item)
@@ -227,6 +227,7 @@ trait UsesFields
         }
 
         $key = $this->field->fieldPathKeys();
+
         array_splice($key, -1, 1, [$this->config('field')]);
         $key = implode('.', $key);
 
