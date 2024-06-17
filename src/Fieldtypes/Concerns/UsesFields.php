@@ -133,9 +133,14 @@ trait UsesFields
             ];
         })->values();
 
-        $existing = collect($this->field->value())->mapWithKeys(function ($item) {
-            return [$item['id'] => $this->getItemFields($item)->addValues($item['values'])->meta()];
-        })->toArray();
+        $existing = collect($this->field->value())
+            ->filter(function ($item) use (&$fields) {
+                return $fields->has($item['handle']);
+            })
+            ->mapWithKeys(function ($item) {
+                return [$item['id'] => $this->getItemFields($item)->addValues($item['values'])->meta()];
+            })
+            ->toArray();
 
         $defaults = $this->getFields()->map(function ($field) {
             return $this->getFieldFields($field)->all()->map(function ($field) {
