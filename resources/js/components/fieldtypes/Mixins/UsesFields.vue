@@ -72,8 +72,7 @@ export default {
             };
 
             this.$axios.get(cp_url('fields/field-meta'), { params }).then(response => {
-                this.meta = response.data.meta;
-                this.value = response.data.value;
+                this.updateMeta(response.data.meta);
             });
         },
 

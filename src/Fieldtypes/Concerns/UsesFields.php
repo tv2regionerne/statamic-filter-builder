@@ -3,14 +3,13 @@
 namespace Tv2regionerne\StatamicFilterBuilder\Fieldtypes\Concerns;
 
 use Facades\Statamic\Fieldtypes\RowId;
+use Statamic\Facades\Blink;
 use Statamic\Facades\Collection;
 use Statamic\Fields\Field;
 use Statamic\Support\Arr;
 
 trait UsesFields
 {
-    protected $fields;
-
     protected $singleTypes = [
         'toggle',
         'date',
@@ -124,14 +123,7 @@ trait UsesFields
 
     public function preload()
     {
-        $fields = $this->getFields()->map(function ($field) {
-            return [
-                'handle' => $field->handle(),
-                'display' => $field->display(),
-                'type' => $field->type(),
-                'fields' => $this->getFieldFields($field)->toPublishArray(),
-            ];
-        })->values();
+        $fields = $this->getFields();
 
         $existing = collect($this->field->value())
             ->filter(function ($item) use (&$fields) {
@@ -158,8 +150,17 @@ trait UsesFields
             })->all();
         })->all();
 
+        $publishFields = $fields->map(function ($field) {
+            return [
+                'handle' => $field->handle(),
+                'display' => $field->display(),
+                'type' => $field->type(),
+                'fields' => $this->getFieldFields($field)->toPublishArray(),
+            ];
+        })->values();
+
         return [
-            'fields' => $fields,
+            'fields' => $publishFields,
             'existing' => $existing,
             'new' => $new,
             'defaults' => $defaults,
@@ -169,16 +170,18 @@ trait UsesFields
 
     protected function getFields()
     {
-        if ($this->fields) {
-            return $this->fields;
+        $collections = collect(Arr::wrap($this->getCollections()));
+        if (! $collections->count()) {
+            return $collections;
         }
 
-        $collections = $this->getCollections();
-        if (! $collections) {
-            return collect();
+        $key = 'filter-builder.fields.'.$collections->join('|');
+
+        if (Blink::has($key)) {
+            return Blink::get($key);
         }
 
-        $groups = collect(Arr::wrap($collections))
+        $groups = $collections
             ->mapWithKeys(function ($collection) {
                 $fields = Collection::findByHandle($collection)->entryBlueprints()
                     ->flatMap(function ($blueprint) {
@@ -197,7 +200,7 @@ trait UsesFields
             $handles = $handles->intersect($fields->keys());
         }
 
-        $this->fields = $groups
+        $fields = $groups
             ->flatMap(fn ($fields) => $fields)
             ->only($handles)
             ->merge([
@@ -210,7 +213,9 @@ trait UsesFields
                 return $a->display() <=> $b->display();
             });
 
-        return $this->fields;
+        Blink::put($key, $fields);
+
+        return $fields;
     }
 
     protected function getItemFields($item)
@@ -225,6 +230,7 @@ trait UsesFields
         }
 
         $key = $this->field->fieldPathKeys();
+
         array_splice($key, -1, 1, [$this->config('field')]);
         $key = implode('.', $key);
 
