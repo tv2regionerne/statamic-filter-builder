@@ -41,10 +41,13 @@ By using `pluck('id')`, you ensure that the returned data is a flat array of IDs
 Here’s how to apply this advanced filter within your template:
 
 ```antlers
-{{ collection:articles query_scope="filter_builder" :filter_builder="my_filter_builder_field_handle" }}
+{{ collection:articles :filter_builder="my_filter_builder_field_handle" }}
     <!-- Articles that match the locations of the current page will be displayed -->
 {{ /collection:articles }}
+
 ```
+Note: the filter builder requires a query scope behind the scenes, so will not work alongside a query_scope parameter.
+
 You may combine the dynamic Filter Builder query with filter parameters.
 
 The Statamic Filter Builder addon is your pathway to creating a responsive and context-aware website, where content curation is as intelligent as it is effortless.

@@ -4,3 +4,4 @@ mix-manifest.json
 public/hot
 composer.lock
 .idea
+.phpunit.cache

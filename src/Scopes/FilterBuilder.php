@@ -24,13 +24,15 @@ class FilterBuilder extends Scope
             $variables = $filter['values']['variables'];
 
             $field = $fields[$handle];
-            $json = in_array($field->type(), ['entries', 'terms', 'users']) && $field->get('max_items', 0) !== 1;
+
+            $json = $field->isRelationship() && $field->get('max_items', 0) !== 1;
 
             $cascade = Cascade::toArray();
             foreach ($variables as $variable) {
                 if (! $parsed = VariableParser::parse($variable, $cascade)) {
                     continue;
                 }
+
                 $values = array_merge($values, $parsed);
             }
 
