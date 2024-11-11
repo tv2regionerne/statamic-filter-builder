@@ -22,7 +22,7 @@ class ServiceProvider extends AddonServiceProvider
         ],
     ];
 
-    public function boot()
+    public function bootAddon()
     {
         $this->addCollectionHook();
     }
