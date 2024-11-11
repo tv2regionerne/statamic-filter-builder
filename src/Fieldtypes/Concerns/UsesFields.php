@@ -236,7 +236,10 @@ trait UsesFields
 
         // We have to do this because the collection fields value may have changed
         // but the parent object has not yet been updated with the new value
-        if ($post = request()->post()) {
+        // We only want to do this during save requests, not publish requests, so
+        // we check for the presence of the _blueprint key as well
+        $post = request()->post();
+        if (isset($post['_blueprint'])) {
             return data_get($post, $key);
         }
 
